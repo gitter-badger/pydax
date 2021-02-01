@@ -32,6 +32,7 @@ from . import typing as typing_
 from .loaders import FormatLoaderMap
 from .loaders._format_loader_map import load_data_files
 from .schema import SchemaDict
+from ._extractors import extract_data_files
 from ._lock import DirectoryLock
 
 
@@ -168,23 +169,7 @@ class Dataset:
                               f'which is different from the expected SHA512 checksum of: ({actual_hash}) '
                               f'the file may by corrupted.')
 
-            # Supports tar archives only for now
-            try:
-                tar = tarfile.open(archive_fp)
-            except tarfile.ReadError as e:
-                raise tarfile.ReadError(f'Failed to unarchive "{archive_fp}"\ncaused by:\n{e}')
-            with tar:
-                members = {}
-                for member in tar.getmembers():
-                    members[member.name] = {'type': int(member.type)}
-                    if member.isreg():  # For regular files, we also save its size
-                        members[member.name]['size'] = member.size
-                with open(self._file_list_file, mode='w') as f:
-                    # We do not specify 'utf-8' here to match the default encoding used by the OS, which also likely
-                    # uses this encoding for accessing the filesystem.
-                    json.dump(members, f, indent=2)
-                tar.extractall(path=self._data_dir)
-
+            extract_data_files(path=archive_fp, data_dir=self._data_dir, file_list_file=self._file_list_file)
             os.remove(archive_fp)
 
     def load(self,

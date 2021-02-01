@@ -115,9 +115,9 @@ class TestDataset:
         fake_schema['download_url'] = schema_file_https_url + '/datasets.yaml'
         fake_schema['sha512sum'] = hashlib.sha512((schema_file_relative_dir / 'datasets.yaml').read_bytes()).hexdigest()
 
-        with pytest.raises(tarfile.ReadError) as e:
+        with pytest.raises(RuntimeError) as e:
             Dataset(fake_schema, data_dir=tmp_path, mode=Dataset.InitializationMode.DOWNLOAD_ONLY)
-        assert 'Failed to unarchive' in str(e.value)
+        assert str(e.value) == 'Filetype not supported'
 
     def test_load(self, downloaded_wikitext103_dataset):
         "Test basic loading functionality."

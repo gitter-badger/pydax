@@ -189,7 +189,7 @@ def _download_dataset(dataset_dir, _loaded_schemata) -> Callable[[str], None]:
     def _download_dataset_impl(name, version):
         # we drop the 'tar.gz' extension here -- our package should work regardless of the extension, and we allow the
         # file to be archived in a different compression format.
-        local_destination = dataset_dir / f'{name}-{version}'
+        local_destination = dataset_dir / f'{name}-{version}.tar.gz'
 
         schema = _loaded_schemata.schemata['datasets'].export_schema('datasets', name, version)
 
@@ -215,7 +215,7 @@ def schema_localized_url(_loaded_schemata, _download_dataset, dataset_base_url) 
     def _schema_localized_url_impl(name, version):
         _download_dataset(name, version)
         schema = _loaded_schemata.schemata['datasets'].export_schema('datasets', name, version)
-        schema['download_url'] = str(f'{dataset_base_url}/{name}-{version}')
+        schema['download_url'] = str(f'{dataset_base_url}/{name}-{version}.tar.gz')
         return schema
 
     return _schema_localized_url_impl
